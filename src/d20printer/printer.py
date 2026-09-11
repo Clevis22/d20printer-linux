@@ -154,7 +154,7 @@ class D20Printer:
         density: int = 2,
         paper_type: int = 0,
         feed_rows: int = 64,
-        block_rows: int = 255,
+        block_rows: int = 0xFFFF,
         timeout: float = 30.0,
     ) -> None:
         self.configure(density=density, paper_type=paper_type)

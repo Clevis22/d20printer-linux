@@ -148,7 +148,23 @@ Visual inspection of the physical strip confirmed both full-width edge lines, th
 
 ### Packaged Linux client
 
-The repository now contains an installable Python package and `d20print` command. On the Raspberry Pi it passes ten protocol, print-pipeline, bit-order, scaling, and text-rendering tests. The installed CLI successfully queried the real D20 and printed a 384 by 72 dot text label at density 2. Current commands support printer status, scaled/dithered image printing, text rendering, adjustable density/feed, and a no-hardware dry-run output.
+The repository now contains an installable Python package and `d20print` command. On the Raspberry Pi it passes protocol, print-pipeline, bit-order, scaling, and text-rendering tests. The installed CLI successfully queried the real D20 and printed a 384 by 72 dot text label at density 2. Current commands support printer status, scaled/dithered image printing, text rendering, adjustable density/feed, and a no-hardware dry-run output.
+
+### Image rendering follow-up
+
+A 384 by 387 dot line drawing exposed two host-side rendering problems. Splitting
+the image into separate 255-row raster commands produced a visible horizontal
+gap because the D20 advances between raster commands. Sending the complete image
+as one `GS v 0` command removed that artificial boundary; the printer accepted
+and acknowledged the 387-row command normally.
+
+The drawing also had a dominant light-gray paper background. Direct
+Floyd-Steinberg conversion made 19.36 percent of the output pixels black and
+rendered the background as dense noise. The automatic tone classifier now
+recognizes high-key line art, estimates its dominant background, maps that
+background to white, and preserves the darker strokes before dithering. On the
+same input, black coverage fell to 6.10 percent. Explicit `line-art`, `photo`,
+and `raw` modes remain available for manual control.
 
 ## Updated protocol assessment
 

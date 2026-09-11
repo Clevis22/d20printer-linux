@@ -31,12 +31,54 @@ def pack_monochrome(image: object) -> Raster:
     return Raster(width, height, bytes(output))
 
 
+def _histogram_percentile(histogram: list[int], fraction: float) -> int:
+    target = sum(histogram) * fraction
+    cumulative = 0
+    for value, count in enumerate(histogram):
+        cumulative += count
+        if cumulative >= target:
+            return value
+    return 255
+
+
+def _looks_like_line_art(image: object) -> bool:
+    histogram = image.histogram()
+    total = sum(histogram)
+    bright_fraction = sum(histogram[192:]) / total
+    dark_fraction = sum(histogram[:160]) / total
+    return (
+        _histogram_percentile(histogram, 0.75) >= 200
+        and bright_fraction >= 0.65
+        and dark_fraction >= 0.03
+    )
+
+
+def _normalize_line_art(image: object) -> object:
+    """Whiten a dominant light background without discarding dark strokes."""
+    histogram = image.histogram()
+    black_point = _histogram_percentile(histogram, 0.01)
+    background = max(range(128, 256), key=histogram.__getitem__)
+    white_point = max(black_point + 1, background - 18)
+    scale = 255 / (white_point - black_point)
+    return image.point(
+        [
+            0
+            if value <= black_point
+            else 255
+            if value >= white_point
+            else round((value - black_point) * scale)
+            for value in range(256)
+        ]
+    )
+
+
 def prepare_image(
     path: str | Path,
     *,
     dither: bool = True,
     threshold: int = 128,
     max_height: int = 8192,
+    image_mode: str = "auto",
 ) -> Raster:
     Image, _, _, ImageOps = _pillow()
     with Image.open(path) as opened:
@@ -48,6 +90,15 @@ def prepare_image(
         raise ValueError(
             f"rendered image is {image.height} rows; safety limit is {max_height}"
         )
+    if image_mode not in {"auto", "line-art", "photo", "raw"}:
+        raise ValueError("image mode must be auto, line-art, photo, or raw")
+    resolved_mode = image_mode
+    if resolved_mode == "auto":
+        resolved_mode = "line-art" if _looks_like_line_art(image) else "photo"
+    if resolved_mode == "line-art":
+        image = _normalize_line_art(image)
+    elif resolved_mode == "photo":
+        image = ImageOps.autocontrast(image, cutoff=(1, 1))
     if dither:
         mono = image.convert("1", dither=Image.Dither.FLOYDSTEINBERG)
     else:

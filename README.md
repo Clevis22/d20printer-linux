@@ -66,6 +66,16 @@ Print an image, scaled to the 384-dot head:
 d20print image photo.png
 ```
 
+Image tone preparation defaults to `auto`: drawings and scans with a dominant
+light background are cleaned as line art, while photographs are contrast
+normalized before dithering. Override it when needed:
+
+```console
+d20print image drawing.png --image-mode line-art
+d20print image portrait.jpg --image-mode photo
+d20print image already-prepared.png --image-mode raw
+```
+
 Print text:
 
 ```console
@@ -93,7 +103,7 @@ d20print image photo.png --dry-run photo.bin
 
 ## Safety
 
-The CLI defaults to uncompressed raster mode, moderate density, bounded image height, 255-row blocks, response timeouts, and explicit print-completion checks. Add `--preflight` to refuse a job when the cover is open, paper is absent, the print head is overheated, or the printer reports itself busy. It does not expose calibration, firmware-update, or arbitrary-command operations.
+The CLI defaults to uncompressed raster mode, moderate density, bounded image height, continuous raster jobs, response timeouts, and explicit print-completion checks. Add `--preflight` to refuse a job when the cover is open, paper is absent, the print head is overheated, or the printer reports itself busy. It does not expose calibration, firmware-update, or arbitrary-command operations.
 
 ## Troubleshooting
 

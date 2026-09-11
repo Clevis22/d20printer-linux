@@ -33,7 +33,7 @@ class PrinterTests(unittest.TestCase):
         self.assertEqual(transport.sent[1], bytes.fromhex("1f 11 05 02 01"))
         self.assertEqual(transport.sent[2], bytes.fromhex("1f 11 05 35 00"))
         raster_heights = [int.from_bytes(item[6:8], "little") for item in transport.sent[3:]]
-        self.assertEqual(raster_heights, [255, 45, 64])
+        self.assertEqual(raster_heights, [300, 64])
 
     def test_preflight_accepts_ready_printer(self):
         printer = D20Printer("00:00:00:00:00:00", transport=FakeTransport())

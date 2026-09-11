@@ -28,6 +28,26 @@ class ImagingTests(unittest.TestCase):
         self.assertEqual((raster.width, raster.height), (384, 100))
         self.assertEqual(len(raster.data), 48 * 100)
 
+    def test_auto_mode_whitens_line_art_background(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "drawing.png"
+            image = Image.new("L", (192, 100), 220)
+            for x in range(70, 122):
+                for y in range(35, 65):
+                    image.putpixel((x, y), 30)
+            image.save(path)
+            raster = prepare_image(path)
+        # Far-background rows stay clean white instead of becoming dither noise.
+        self.assertFalse(any(raster.data[: 48 * 20]))
+        self.assertTrue(any(raster.data[48 * 70 : 48 * 130]))
+
+    def test_raw_mode_preserves_threshold_input(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "gray.png"
+            Image.new("L", (384, 8), 127).save(path)
+            raster = prepare_image(path, image_mode="raw", dither=False)
+        self.assertTrue(all(value == 0xFF for value in raster.data))
+
     def test_text_raster_has_black_pixels(self):
         raster = render_text("Hello from Linux", font_size=24)
         self.assertEqual(raster.width, 384)

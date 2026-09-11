@@ -59,6 +59,12 @@ def build_parser() -> argparse.ArgumentParser:
     image.add_argument("path", type=Path)
     image.add_argument("--threshold", type=int, choices=range(256), default=128)
     image.add_argument("--no-dither", action="store_true")
+    image.add_argument(
+        "--image-mode",
+        choices=("auto", "line-art", "photo", "raw"),
+        default="auto",
+        help="tone preparation before 1-bit conversion (default: auto)",
+    )
     image.add_argument("--max-height", type=_positive, default=8192)
     _add_print_options(image)
 
@@ -110,6 +116,7 @@ def main(argv: list[str] | None = None) -> int:
                 dither=not args.no_dither,
                 threshold=args.threshold,
                 max_height=args.max_height,
+                image_mode=args.image_mode,
             )
         else:
             raster = render_text(args.value, font=args.font, font_size=args.font_size)
