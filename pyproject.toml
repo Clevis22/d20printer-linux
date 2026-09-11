@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "d20printer"
+version = "0.1.0"
+description = "Linux driver and CLI for the NDYIN/Jiuyin D20 Bluetooth thermal printer"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Kieran Gannon" }]
+keywords = ["bluetooth", "linux", "raspberry-pi", "thermal-printer", "escpos"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Printing",
+]
+dependencies = ["Pillow>=9"]
+
+[project.urls]
+Homepage = "https://github.com/Clevis22/d20printer-linux"
+Repository = "https://github.com/Clevis22/d20printer-linux"
+Issues = "https://github.com/Clevis22/d20printer-linux/issues"
+
+[project.scripts]
+d20print = "d20printer.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
